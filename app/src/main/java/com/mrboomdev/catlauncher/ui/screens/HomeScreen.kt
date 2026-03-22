@@ -1,9 +1,7 @@
 package com.mrboomdev.catlauncher.ui.screens
 
-import androidx.compose.foundation.layout.Arrangement
-import androidx.compose.foundation.layout.Column
-import androidx.compose.foundation.layout.fillMaxSize
-import androidx.compose.foundation.layout.padding
+import android.annotation.SuppressLint
+import androidx.compose.foundation.layout.*
 import androidx.compose.material3.LocalContentColor
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Text
@@ -17,28 +15,24 @@ import androidx.compose.ui.text.font.FontFamily
 import androidx.compose.ui.text.font.FontVariation
 import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.tooling.preview.Preview
-import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import com.mrboomdev.catlauncher.R
 import kotlinx.coroutines.delay
-import java.time.LocalDate
-import java.time.format.DateTimeFormatter
-import java.util.Calendar
-
+import java.text.SimpleDateFormat
+import java.util.*
 
 @OptIn(ExperimentalTextApi::class)
 @Composable
-fun HomeScreen() {
+fun HomeScreen(contentPadding: PaddingValues) {
     var currentTime by remember { mutableStateOf("") }
     var currentDate by remember { mutableStateOf("") }
 
     LaunchedEffect(Unit) { 
         while(true) {
             val calendar = Calendar.getInstance()
-            val date = LocalDate.now()
-            
-            val dateFormatter = DateTimeFormatter.ofPattern("EEE, MMM d")
-            currentDate = date.format(dateFormatter)
+
+            @SuppressLint("SimpleDateFormat")
+            currentDate = SimpleDateFormat("EEE, MMM d").format(Date())
 
             fun formatTimePart(timePart: Int) = if(timePart >= 10) {
                 timePart.toString()
@@ -59,7 +53,7 @@ fun HomeScreen() {
     ) {
         Column(
             modifier = Modifier
-                .padding(16.dp)
+                .padding(contentPadding)
                 .fillMaxSize(),
             verticalArrangement = Arrangement.Bottom,
             horizontalAlignment = Alignment.CenterHorizontally
@@ -84,7 +78,7 @@ fun HomeScreen() {
                                 )
                             )
                         )
-                    },
+                    }
                 )
                 
                 Text(
@@ -105,7 +99,7 @@ fun HomeScreen() {
                                 )
                             )
                         )
-                    },
+                    }
                 )
             }
         }
@@ -119,5 +113,5 @@ fun HomeScreen() {
 )
 @Composable
 private fun HomeScreenPreview() {
-    HomeScreen()
+    HomeScreen(PaddingValues())
 }
