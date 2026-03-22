@@ -1,3 +1,5 @@
+@file:Suppress("UnstableApiUsage")
+
 pluginManagement {
     repositories {
         google {
@@ -7,6 +9,7 @@ pluginManagement {
                 includeGroupByRegex("androidx.*")
             }
         }
+        
         mavenCentral()
         gradlePluginPortal()
     }
@@ -16,6 +19,7 @@ dependencyResolutionManagement {
     repositories {
         google()
         mavenCentral()
+        maven { url = uri("https://jitpack.io") }
     }
 }
 

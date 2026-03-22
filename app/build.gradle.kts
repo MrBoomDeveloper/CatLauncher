@@ -48,6 +48,7 @@ dependencies {
     implementation("androidx.room3:room3-runtime:3.0.0-alpha01")
     implementation("com.cheonjaeung.compose.grid:grid:2.7.0")
     implementation("com.google.accompanist:accompanist-drawablepainter:0.37.3")
+    implementation("com.github.idapgroup:Snowfall:0.9.10")
     testImplementation(libs.junit)
     androidTestImplementation(libs.androidx.junit)
     androidTestImplementation(libs.androidx.espresso.core)
