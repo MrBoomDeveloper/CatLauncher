@@ -1,17 +1,16 @@
-package com.mrboomdev.catlauncher.data
+package com.mrboomdev.catlauncher.data.entity
 
-import android.R.attr.name
 import android.content.ComponentName
 import android.content.Context
 import android.content.Intent
 import android.content.pm.ActivityInfo
 import android.content.pm.ResolveInfo
-import android.graphics.drawable.Drawable
-import android.net.Uri
+import androidx.compose.ui.graphics.painter.Painter
+import com.google.accompanist.drawablepainter.DrawablePainter
 
 data class App(
     val title: String,
-    val icon: Drawable,
+    val icon: Painter,
     val intent: Intent,
     val cats: List<Int>
 )
@@ -21,7 +20,7 @@ fun ResolveInfo.toApp(
     cats: List<Int>
 ) = App(
     title = loadLabel(context.packageManager).toString(),
-    icon = loadIcon(context.packageManager),
+    icon = DrawablePainter(loadIcon(context.packageManager)),
     intent = activityInfo.intent,
     cats = cats
 )

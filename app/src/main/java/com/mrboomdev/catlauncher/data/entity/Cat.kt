@@ -1,4 +1,4 @@
-package com.mrboomdev.catlauncher.data
+package com.mrboomdev.catlauncher.data.entity
 
 data class Cat(
     val id: Int,

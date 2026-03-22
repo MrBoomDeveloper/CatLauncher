@@ -7,20 +7,22 @@ import androidx.compose.runtime.Composable
 import androidx.compose.runtime.rememberCoroutineScope
 import androidx.compose.runtime.retain.retain
 import androidx.compose.ui.platform.LocalContext
-import com.mrboomdev.catlauncher.data.App
-import com.mrboomdev.catlauncher.data.Cat
-import com.mrboomdev.catlauncher.data.toApp
+import androidx.room3.Room
+import com.mrboomdev.catlauncher.data.db.CatLauncherDatabase
+import com.mrboomdev.catlauncher.data.entity.App
+import com.mrboomdev.catlauncher.data.entity.Cat
+import com.mrboomdev.catlauncher.data.entity.toApp
 import kotlinx.coroutines.DelicateCoroutinesApi
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.GlobalScope
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.SharingStarted
-import kotlinx.coroutines.flow.StateFlow
 import kotlinx.coroutines.flow.asStateFlow
 import kotlinx.coroutines.flow.combine
-import kotlinx.coroutines.flow.map
 import kotlinx.coroutines.flow.stateIn
 import kotlinx.coroutines.launch
+import kotlin.getValue
+import kotlin.jvm.java
 
 @OptIn(DelicateCoroutinesApi::class)
 class CatLauncher(private val context: Context) {
@@ -48,6 +50,12 @@ class CatLauncher(private val context: Context) {
         scope = GlobalScope,
         started = SharingStarted.WhileSubscribed(5000L),
         initialValue = emptyList()
+    )
+    
+    val database = Room.databaseBuilder(
+        context = context,
+        klass = CatLauncherDatabase::class.java,
+        name = "settings"
     )
     
     suspend fun init() {

@@ -1,13 +1,11 @@
 package com.mrboomdev.catlauncher.ui.components
 
 import android.content.Intent
-import android.util.Log.i
 import androidx.compose.foundation.background
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.padding
-import androidx.compose.foundation.lazy.grid.LazyVerticalGrid
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
@@ -22,8 +20,8 @@ import androidx.compose.ui.unit.dp
 import com.cheonjaeung.compose.grid.SimpleGridCells
 import com.cheonjaeung.compose.grid.VerticalGrid
 import com.mrboomdev.catlauncher.R
-import com.mrboomdev.catlauncher.data.App
-import com.mrboomdev.catlauncher.data.Cat
+import com.mrboomdev.catlauncher.data.entity.App
+import com.mrboomdev.catlauncher.data.entity.Cat
 
 @Composable
 fun CatPanel(
@@ -67,7 +65,7 @@ fun CatPanel(
 @Preview(showBackground = true)
 @Composable
 private fun CatPanelPreview() {
-    val context = LocalContext.current
+    val icon = painterResource(R.drawable.bocchi)
     
     val cat = remember { 
         Cat(
@@ -80,7 +78,7 @@ private fun CatPanelPreview() {
         List(15) { i ->
             App(
                 title = "App $i",
-                icon = context.getDrawable(R.drawable.bocchi)!!,
+                icon = icon,
                 intent = Intent(),
                 cats = emptyList()
             )

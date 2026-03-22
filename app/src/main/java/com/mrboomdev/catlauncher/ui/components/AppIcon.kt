@@ -20,13 +20,12 @@ import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.layout.ContentScale
-import androidx.compose.ui.platform.LocalContext
+import androidx.compose.ui.res.painterResource
 import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
-import com.google.accompanist.drawablepainter.rememberDrawablePainter
 import com.mrboomdev.catlauncher.R
-import com.mrboomdev.catlauncher.data.App
+import com.mrboomdev.catlauncher.data.entity.App
 
 @Composable
 fun AppIcon(
@@ -39,13 +38,13 @@ fun AppIcon(
     ) {
         Column(
             modifier = Modifier
-                .clip(RoundedCornerShape(16.dp))
+                .clip(RoundedCornerShape(8.dp))
                 .combinedClickable(
                     onClick = onClick,
                     onLongClick = onLongClick
                 ),
             horizontalAlignment = Alignment.CenterHorizontally,
-            verticalArrangement = Arrangement.spacedBy(4.dp)
+            verticalArrangement = Arrangement.spacedBy(6.dp)
         ) {
             Image(
                 modifier = Modifier
@@ -53,7 +52,7 @@ fun AppIcon(
                     .fillMaxWidth()
                     .aspectRatio(1f),
                 contentScale = ContentScale.Fit,
-                painter = rememberDrawablePainter(app.icon),
+                painter = app.icon,
                 contentDescription = null
             )
 
@@ -74,12 +73,12 @@ fun AppIcon(
 )
 @Composable
 private fun AppIconPreview() {
-    val context = LocalContext.current
+    val icon = painterResource(R.drawable.bocchi)
     
     val app = remember {
         App(
             title = "CatLauncher",
-            icon = context.getDrawable(R.drawable.bocchi)!!,
+            icon = icon,
             intent = Intent(),
             cats = emptyList()
         )

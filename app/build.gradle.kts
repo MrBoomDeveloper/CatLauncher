@@ -45,6 +45,7 @@ dependencies {
     implementation(libs.androidx.ui.graphics)
     implementation(libs.androidx.ui.tooling.preview)
     implementation(libs.androidx.material3)
+    implementation("androidx.room3:room3-runtime:3.0.0-alpha01")
     implementation("com.cheonjaeung.compose.grid:grid:2.7.0")
     implementation("com.google.accompanist:accompanist-drawablepainter:0.37.3")
     testImplementation(libs.junit)
