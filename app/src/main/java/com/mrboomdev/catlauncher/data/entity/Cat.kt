@@ -2,5 +2,6 @@ package com.mrboomdev.catlauncher.data.entity
 
 data class Cat(
     val id: Int,
-    val name: String
+    val name: String,
+    val icon: Int? = null
 )

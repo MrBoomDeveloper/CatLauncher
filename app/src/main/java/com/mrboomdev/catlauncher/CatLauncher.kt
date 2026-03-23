@@ -15,14 +15,8 @@ import com.mrboomdev.catlauncher.data.entity.toApp
 import kotlinx.coroutines.DelicateCoroutinesApi
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.GlobalScope
-import kotlinx.coroutines.flow.MutableStateFlow
-import kotlinx.coroutines.flow.SharingStarted
-import kotlinx.coroutines.flow.asStateFlow
-import kotlinx.coroutines.flow.combine
-import kotlinx.coroutines.flow.stateIn
+import kotlinx.coroutines.flow.*
 import kotlinx.coroutines.launch
-import kotlin.getValue
-import kotlin.jvm.java
 
 @OptIn(DelicateCoroutinesApi::class)
 class CatLauncher(private val context: Context) {
@@ -62,22 +56,56 @@ class CatLauncher(private val context: Context) {
         _cats.emit(listOf(
             Cat(
                 id = 0,
-                name = "Chat"
+                name = "Accessibility",
+                icon = R.drawable.ic_accessibility
             ),
 
             Cat(
                 id = 1,
-                name = "Social"
+                name = "Audio",
+                icon = R.drawable.ic_headphones_outlined
             ),
 
             Cat(
                 id = 2,
-                name = "Food"
+                name = "Games",
+                icon = R.drawable.ic_videogame_asset_outlined
             ),
 
             Cat(
                 id = 3,
-                name = "Money"
+                name = "Images",
+                icon = R.drawable.ic_image_outlined
+            ),
+
+            Cat(
+                id = 4,
+                name = "Maps",
+                icon = R.drawable.ic_location_on_outlined
+            ),
+
+            Cat(
+                id = 5,
+                name = "News",
+                icon = R.drawable.ic_newspaper_outlined
+            ),
+
+            Cat(
+                id = 6,
+                name = "Productivity",
+                icon = R.drawable.ic_checklist
+            ),
+
+            Cat(
+                id = 7,
+                name = "Social",
+                icon = R.drawable.ic_chat_outlined
+            ),
+            
+            Cat(
+                id = 8,
+                name = "Videos",
+                icon = R.drawable.ic_movie_outlined
             )
         ))
         

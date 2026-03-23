@@ -5,6 +5,7 @@ import androidx.activity.ComponentActivity
 import androidx.activity.compose.BackHandler
 import androidx.activity.compose.setContent
 import androidx.activity.enableEdgeToEdge
+import androidx.compose.animation.animateColorAsState
 import androidx.compose.foundation.Image
 import androidx.compose.foundation.LocalOverscrollFactory
 import androidx.compose.foundation.interaction.MutableInteractionSource
@@ -107,14 +108,25 @@ private fun App() {
             Scaffold(
                 containerColor = Color.Transparent,
                 bottomBar = {
+                    val backgroundColor by animateColorAsState(
+                        if(pagerState.currentPage == 0) {
+                            MaterialTheme.colorScheme.primaryContainer.copy(alpha = .25f)
+                        } else Color(0xCC000000)
+                    )
+                    
                     Surface(
                         modifier = Modifier
-                            .windowInsetsPadding(WindowInsets.safeDrawing.only(
-                                WindowInsetsSides.Horizontal + WindowInsetsSides.Bottom
-                            )).padding(16.dp),
+                            .windowInsetsPadding(
+                                WindowInsets.safeDrawing.only(
+                                    WindowInsetsSides.Horizontal + WindowInsetsSides.Bottom
+                                )
+                            )
+                            .padding(16.dp),
+                        
                         shape = RoundedCornerShape(32.dp),
-                        color = MaterialTheme.colorScheme.primaryContainer.copy(alpha = .25f),
                         contentColor = MaterialTheme.colorScheme.onPrimaryContainer,
+                        color = backgroundColor,
+                        
                         onClick = {
                             searchFocusRequester.requestFocus()
                             keyboardController?.show()
@@ -127,10 +139,7 @@ private fun App() {
                         Row(
                             modifier = Modifier
                                 .fillMaxWidth()
-                                .padding(
-                                    horizontal = 16.dp,
-                                    vertical = 8.dp
-                                ),
+                                .padding(start = 16.dp),
                             verticalAlignment = Alignment.CenterVertically,
                             horizontalArrangement = Arrangement.spacedBy(8.dp)
                         ) {
@@ -182,6 +191,74 @@ private fun App() {
                                     )
                                 }
                             )
+                            
+                            Box {
+                                var showOptions by remember { mutableStateOf(false) }
+                                
+                                IconButton({ showOptions = true }) {
+                                    Icon(
+                                        modifier = Modifier.size(24.dp),
+                                        painter = painterResource(R.drawable.ic_more_vert),
+                                        contentDescription = null
+                                    )
+                                }
+                                
+                                DropdownMenu(
+                                    expanded = showOptions,
+                                    onDismissRequest = { showOptions = false },
+                                    shape = RoundedCornerShape(32.dp)
+                                ) {
+                                    DropdownMenuItem(
+                                        contentPadding = PaddingValues(
+                                            start = 16.dp,
+                                            end = 32.dp
+                                        ),
+
+                                        leadingIcon = {
+                                            Icon(
+                                                modifier = Modifier.size(24.dp),
+                                                painter = painterResource(R.drawable.ic_image_outlined),
+                                                contentDescription = null
+                                            )
+                                        },
+                                        
+                                        text = {
+                                            Text(
+                                                text = "Wallpaper"
+                                            )
+                                        },
+
+                                        onClick = {
+
+                                        }
+                                    )
+                                    
+                                    DropdownMenuItem(
+                                        contentPadding = PaddingValues(
+                                            start = 16.dp,
+                                            end = 32.dp
+                                        ),
+
+                                        leadingIcon = {
+                                            Icon(
+                                                modifier = Modifier.size(24.dp),
+                                                painter = painterResource(R.drawable.ic_settings_outlined),
+                                                contentDescription = null
+                                            )
+                                        },
+                                        
+                                        text = {
+                                            Text(
+                                                text = "Settings"
+                                            )
+                                        },
+                                        
+                                        onClick = {
+                                            
+                                        }
+                                    )
+                                }
+                            }
                         }
                     }
                 }

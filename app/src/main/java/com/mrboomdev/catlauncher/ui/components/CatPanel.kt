@@ -2,13 +2,11 @@ package com.mrboomdev.catlauncher.ui.components
 
 import android.content.Intent
 import androidx.compose.foundation.background
-import androidx.compose.foundation.layout.Arrangement
-import androidx.compose.foundation.layout.Column
-import androidx.compose.foundation.layout.Row
-import androidx.compose.foundation.layout.padding
+import androidx.compose.foundation.layout.*
 import androidx.compose.foundation.shape.RoundedCornerShape
-import androidx.compose.material3.Text
+import androidx.compose.material3.*
 import androidx.compose.runtime.*
+import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
 import androidx.compose.ui.graphics.Color
@@ -49,11 +47,24 @@ fun CatPanel(
         modifier = modifier
             .clip(RoundedCornerShape(16.dp))
             .background(Color(0x99000000))
-            .padding(16.dp),
-        verticalArrangement = Arrangement.spacedBy(12.dp)
+            .padding(horizontal = 16.dp, vertical = 4.dp),
+        verticalArrangement = Arrangement.spacedBy(8.dp)
     ) {
-        Row {
+        Row(
+            verticalAlignment = Alignment.CenterVertically,
+            horizontalArrangement = Arrangement.spacedBy(12.dp)
+        ) {
+            cat.icon?.also { icon ->
+                Icon(
+                    modifier = Modifier.size(24.dp),
+                    painter = painterResource(icon),
+                    contentDescription = null,
+                    tint = Color.White
+                )
+            }
+            
             Text(
+                modifier = Modifier.weight(1f),
                 text = cat.name,
                 color = Color.White,
                 
@@ -70,6 +81,128 @@ fun CatPanel(
                     )
                 }
             )
+
+            Box {
+                var showOptions by remember { mutableStateOf(false) }
+
+                CompositionLocalProvider(
+                    LocalContentColor provides Color.White
+                ) {
+                    IconButton({ showOptions = true }) {
+                        Icon(
+                            modifier = Modifier.size(24.dp),
+                            painter = painterResource(R.drawable.ic_more_vert),
+                            contentDescription = null
+                        )
+                    }
+                }
+
+                DropdownMenu(
+                    expanded = showOptions,
+                    onDismissRequest = { showOptions = false },
+                    shape = RoundedCornerShape(32.dp)
+                ) {
+                    DropdownMenuItem(
+                        contentPadding = PaddingValues(
+                            start = 16.dp,
+                            end = 32.dp
+                        ),
+
+                        leadingIcon = {
+                            Icon(
+                                modifier = Modifier.size(24.dp),
+                                painter = painterResource(R.drawable.ic_reorder),
+                                contentDescription = null
+                            )
+                        },
+
+                        text = {
+                            Text(
+                                text = "Reorder"
+                            )
+                        },
+
+                        onClick = {
+
+                        }
+                    )
+                    
+                    DropdownMenuItem(
+                        contentPadding = PaddingValues(
+                            start = 16.dp,
+                            end = 32.dp
+                        ),
+
+                        leadingIcon = {
+                            Icon(
+                                modifier = Modifier.size(24.dp),
+                                painter = painterResource(R.drawable.ic_image_outlined),
+                                contentDescription = null
+                            )
+                        },
+                        
+                        text = {
+                            Text(
+                                text = "Change icon"
+                            )
+                        },
+
+                        onClick = {
+
+                        }
+                    )
+
+                    DropdownMenuItem(
+                        contentPadding = PaddingValues(
+                            start = 16.dp,
+                            end = 32.dp
+                        ),
+                        
+                        leadingIcon = {
+                            Icon(
+                                modifier = Modifier.size(24.dp),
+                                painter = painterResource(R.drawable.ic_label_outlined),
+                                contentDescription = null
+                            )
+                        },
+                        
+                        text = {
+                            Text(
+                                text = "Rename"
+                            )
+                        },
+
+                        onClick = {
+
+                        }
+                    )
+
+                    DropdownMenuItem(
+                        contentPadding = PaddingValues(
+                            start = 16.dp,
+                            end = 32.dp
+                        ),
+                        
+                        leadingIcon = {
+                            Icon(
+                                modifier = Modifier.size(24.dp),
+                                painter = painterResource(R.drawable.ic_delete_outlined),
+                                contentDescription = null
+                            )
+                        },
+                        
+                        text = {
+                            Text(
+                                text = "Delete"
+                            )
+                        },
+
+                        onClick = {
+
+                        }
+                    )
+                }
+            }
         }
 
         VerticalGrid(
