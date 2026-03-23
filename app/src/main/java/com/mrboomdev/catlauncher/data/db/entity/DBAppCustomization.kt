@@ -13,5 +13,6 @@ import androidx.room3.Entity
 data class DBAppCustomization(
     @ColumnInfo(name = "package_name") val packageName: String,
     @ColumnInfo(name = "activity_name") val activityName: String,
-    @ColumnInfo(name = "is_hidden") val isHidden: Boolean
+    @ColumnInfo(name = "is_hidden") val isHidden: Boolean,
+    @ColumnInfo(name = "custom_title") val customTitle: String?
 )

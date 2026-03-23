@@ -9,6 +9,7 @@ import androidx.compose.foundation.layout.aspectRatio
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.shape.CircleShape
 import androidx.compose.foundation.shape.RoundedCornerShape
+import androidx.compose.foundation.text.TextAutoSize
 import androidx.compose.material3.LocalContentColor
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Text
@@ -21,12 +22,19 @@ import androidx.compose.ui.draw.clip
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.layout.ContentScale
 import androidx.compose.ui.res.painterResource
+import androidx.compose.ui.text.ExperimentalTextApi
+import androidx.compose.ui.text.font.Font
+import androidx.compose.ui.text.font.FontFamily
+import androidx.compose.ui.text.font.FontVariation
 import androidx.compose.ui.text.style.TextAlign
+import androidx.compose.ui.text.style.TextOverflow
 import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
+import androidx.compose.ui.unit.sp
 import com.mrboomdev.catlauncher.R
 import com.mrboomdev.catlauncher.data.entity.App
 
+@OptIn(ExperimentalTextApi::class)
 @Composable
 fun AppIcon(
     app: App,
@@ -61,7 +69,25 @@ fun AppIcon(
                 textAlign = TextAlign.Center,
                 minLines = 2,
                 maxLines = 2,
-                text = app.title
+                overflow = TextOverflow.Ellipsis,
+                text = app.title,
+                
+                autoSize = TextAutoSize.StepBased(
+                    minFontSize = 8.sp,
+                    maxFontSize = 12.sp
+                ),
+
+                fontFamily = remember {
+                    FontFamily(
+                        Font(
+                            resId = R.font.google_sans_flex,
+                            variationSettings = FontVariation.Settings(
+                                FontVariation.weight(400),
+                                FontVariation.opticalSizing(12.sp)
+                            )
+                        )
+                    )
+                }
             )
         }
     }

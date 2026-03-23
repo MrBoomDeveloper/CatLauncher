@@ -116,9 +116,10 @@ private fun App() {
                         color = MaterialTheme.colorScheme.primaryContainer.copy(alpha = .25f),
                         contentColor = MaterialTheme.colorScheme.onPrimaryContainer,
                         onClick = {
+                            searchFocusRequester.requestFocus()
+                            keyboardController?.show()
+                            
                             coroutineScope.launch {
-                                searchFocusRequester.requestFocus()
-                                keyboardController?.show()
                                 pagerState.animateScrollToPage(1)
                             }
                         }
@@ -155,9 +156,9 @@ private fun App() {
                                     .weight(1f)
                                     .focusRequester(searchFocusRequester),
                                 
-                                value = searchQuery,
-                                onValueChange = { searchQuery = it },
                                 interactionSource = searchInteractionSource,
+                                value = searchQuery,
+                                onValueChange = { text -> searchQuery = text },
                                 
                                 textStyle = LocalTextStyle.current.copy(
                                     fontFamily = queryFontFamily,
@@ -218,7 +219,10 @@ private fun App() {
                                 
                                 catsWithApps = catsWithApps.map { (cat, apps) ->
                                     cat to apps.filter { app -> 
-                                        app.title.contains(searchQuery)
+                                        app.title.trim().contains(
+                                            other = searchQuery.trim(), 
+                                            ignoreCase = true
+                                        )
                                     }
                                 }
                             )
