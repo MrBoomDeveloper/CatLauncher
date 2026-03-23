@@ -1,5 +1,6 @@
 package com.mrboomdev.catlauncher
 
+import android.content.Intent
 import android.os.Bundle
 import androidx.activity.ComponentActivity
 import androidx.activity.compose.BackHandler
@@ -26,6 +27,7 @@ import androidx.compose.ui.focus.focusRequester
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.input.nestedscroll.NestedScrollConnection
 import androidx.compose.ui.layout.ContentScale
+import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.platform.LocalLayoutDirection
 import androidx.compose.ui.platform.LocalSoftwareKeyboardController
 import androidx.compose.ui.res.painterResource
@@ -57,6 +59,7 @@ class MainActivity : ComponentActivity() {
 @OptIn(ExperimentalTextApi::class)
 @Composable
 private fun App() {
+    val context = LocalContext.current
     val keyboardController = LocalSoftwareKeyboardController.current
     val catApp = currentCatLauncher()
     val isLoading by catApp.isLoading.collectAsState()
@@ -229,7 +232,8 @@ private fun App() {
                                         },
 
                                         onClick = {
-
+                                            context.startActivity(Intent(Intent.ACTION_SET_WALLPAPER))
+                                            showOptions = false
                                         }
                                     )
                                     
