@@ -1,5 +1,6 @@
 package com.mrboomdev.catlauncher.ui.dialogs
 
+import android.content.Context
 import android.content.Intent
 import android.net.Uri
 import android.provider.Settings
@@ -23,10 +24,17 @@ import androidx.compose.ui.text.font.Font
 import androidx.compose.ui.text.font.FontFamily
 import androidx.compose.ui.text.font.FontVariation
 import androidx.compose.ui.text.input.ImeAction
+import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
+import androidx.core.content.FileProvider
 import com.mrboomdev.catlauncher.R
 import com.mrboomdev.catlauncher.data.entity.App
+import java.io.File
+import java.io.FileInputStream
+import java.io.FileOutputStream
+import java.util.zip.ZipEntry
+import java.util.zip.ZipOutputStream
 
 @OptIn(ExperimentalMaterial3Api::class, ExperimentalTextApi::class)
 @Composable
@@ -122,21 +130,27 @@ fun CustomizeAppDialog(
                     R.drawable.ic_settings_outlined,
                     "Settings"
                 ) {
-                    context.startActivity(Intent(Settings.ACTION_APPLICATION_DETAILS_SETTINGS, Uri.fromParts("package", app.intent.component!!.packageName, null)))
+                    context.startActivity(Intent(
+                        Settings.ACTION_APPLICATION_DETAILS_SETTINGS, 
+                        Uri.fromParts("package", app.intent.component!!.packageName, null)
+                    ))
                 },
 
                 Triple(
                     R.drawable.ic_share_outlined,
                     "Share"
                 ) {
-
+                    shareApp(context, app.intent.component!!.packageName)
                 },
 
                 Triple(
                     R.drawable.ic_delete_outlined,
                     "Uninstall"
                 ) {
-                    context.startActivity(Intent(Intent.ACTION_DELETE, Uri.fromParts("package", app.intent.component!!.packageName, null)))
+                    context.startActivity(Intent(
+                        Intent.ACTION_DELETE, 
+                        Uri.fromParts("package", app.intent.component!!.packageName, null)
+                    ))
                 },
 
                 Triple(
@@ -174,4 +188,72 @@ fun CustomizeAppDialog(
             }
         }
     }
+}
+
+private fun shareApp(context: Context, packageName: String) {
+    val pm = context.packageManager
+    val appInfo = pm.getApplicationInfo(packageName, 0)
+    val splits = appInfo.splitSourceDirs
+    
+    val outputFile: File
+    val mimeType: String
+
+    if(!splits.isNullOrEmpty()) {
+        outputFile = File(context.cacheDir, "${packageName}.apks")
+        val allPaths = listOf(appInfo.sourceDir) + splits
+        zipFiles(allPaths, outputFile)
+        mimeType = "application/octet-stream"
+    } else {
+        outputFile = File(context.cacheDir, "${packageName}.apk")
+        File(appInfo.sourceDir).inputStream().use { input ->
+            outputFile.outputStream().use { output ->
+                input.copyTo(output)
+            }
+        }
+        
+        mimeType = "application/vnd.android.package-archive"
+    }
+    
+    context.startActivity(Intent.createChooser(Intent(Intent.ACTION_SEND).apply {
+        type = mimeType
+        addFlags(Intent.FLAG_GRANT_READ_URI_PERMISSION)
+        putExtra(Intent.EXTRA_STREAM, FileProvider.getUriForFile(
+            context,
+            "${context.packageName}.provider",
+            outputFile
+        ))
+    }, "Share App"))
+}
+
+private fun zipFiles(srcFilePaths: List<String>, destFile: File) {
+    ZipOutputStream(FileOutputStream(destFile)).use { zipOut ->
+        srcFilePaths.forEach { path ->
+            val file = File(path)
+            FileInputStream(file).use { fis ->
+                zipOut.putNextEntry(ZipEntry(file.name))
+                fis.copyTo(zipOut)
+                zipOut.closeEntry()
+            }
+        }
+    }
+}
+
+@Preview(showBackground = true)
+@Composable
+private fun CustomizeAppDialogPreview() {
+    val icon = painterResource(R.drawable.bocchi)
+    
+    val app = remember {
+        App(
+            title = "CatLauncher",
+            icon = icon,
+            intent = Intent(),
+            cats = emptyList()
+        )
+    }
+
+    CustomizeAppDialog(
+        onDismissRequest = {},
+        app = app
+    )
 }
