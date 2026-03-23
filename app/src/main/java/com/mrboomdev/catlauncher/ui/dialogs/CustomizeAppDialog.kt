@@ -11,8 +11,7 @@ import androidx.compose.foundation.text.KeyboardOptions
 import androidx.compose.foundation.text.input.TextFieldLineLimits
 import androidx.compose.foundation.text.input.rememberTextFieldState
 import androidx.compose.material3.*
-import androidx.compose.runtime.Composable
-import androidx.compose.runtime.remember
+import androidx.compose.runtime.*
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.Color
@@ -27,9 +26,15 @@ import androidx.compose.ui.text.input.ImeAction
 import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
+import androidx.compose.ui.window.PopupProperties
 import androidx.core.content.FileProvider
+import com.dokar.chiptextfield.Chip
+import com.dokar.chiptextfield.m3.OutlinedChipTextField
+import com.dokar.chiptextfield.rememberChipTextFieldState
 import com.mrboomdev.catlauncher.R
+import com.mrboomdev.catlauncher.currentCatLauncher
 import com.mrboomdev.catlauncher.data.entity.App
+import kotlinx.coroutines.flow.map
 import java.io.File
 import java.io.FileInputStream
 import java.io.FileOutputStream
@@ -44,6 +49,21 @@ fun CustomizeAppDialog(
 ) {
     val context = LocalContext.current
     val newTitle = rememberTextFieldState()
+    val selectedCatsState = rememberChipTextFieldState<Chip>()
+    var newCat by remember { mutableStateOf("") }
+
+    val font = remember {
+        FontFamily(
+            Font(
+                resId = R.font.google_sans_flex,
+                variationSettings = FontVariation.Settings(
+                    FontVariation.width(115f),
+                    FontVariation.weight(600),
+                    FontVariation.opticalSizing(22.sp)
+                )
+            )
+        )
+    }
     
     ModalBottomSheet(
         onDismissRequest = onDismissRequest
@@ -61,19 +81,6 @@ fun CustomizeAppDialog(
                 painter = app.icon,
                 contentDescription = null
             )
-
-            val font = remember {
-                FontFamily(
-                    Font(
-                        resId = R.font.google_sans_flex,
-                        variationSettings = FontVariation.Settings(
-                            FontVariation.width(115f),
-                            FontVariation.weight(600),
-                            FontVariation.opticalSizing(22.sp)
-                        )
-                    )
-                )
-            }
 
             OutlinedTextField(
                 modifier = Modifier
@@ -106,7 +113,84 @@ fun CustomizeAppDialog(
             )
         }
 
-        Spacer(Modifier.height(8.dp))
+        Text(
+            modifier = Modifier
+                .padding(horizontal = 16.dp)
+                .padding(top = 16.dp, bottom = 8.dp),
+            text = "Categories",
+            color = Color.White,
+
+            fontFamily = remember {
+                FontFamily(
+                    Font(
+                        resId = R.font.google_sans_flex,
+                        variationSettings = FontVariation.Settings(
+                            FontVariation.width(115f),
+                            FontVariation.weight(600),
+                            FontVariation.opticalSizing(12.sp)
+                        )
+                    )
+                )
+            }
+        )
+        
+        Box {
+            OutlinedChipTextField(
+                modifier = Modifier
+                    .padding(horizontal = 16.dp)
+                    .padding(bottom = 8.dp),
+                shape = RoundedCornerShape(8.dp),
+                state = selectedCatsState,
+                value = newCat,
+
+                onValueChange = {
+                    newCat = it
+                },
+
+                onSubmit = {
+                    Chip(it)
+                }
+            )
+            
+            val matchingCats by currentCatLauncher().cats.map { cats ->
+                cats.filter { cat ->
+                    cat.name.contains(newCat, ignoreCase = true) && selectedCatsState.chips.none { chip -> 
+                        chip.text == cat.name
+                    }
+                }.sortedBy { cat ->
+                    cat.name
+                }
+            }.collectAsState(emptyList())
+
+            DropdownMenu(
+                expanded = newCat.isNotBlank() && matchingCats.isNotEmpty(),
+                
+                properties = PopupProperties(
+                    dismissOnBackPress = true,
+                    dismissOnClickOutside = true,
+                    focusable = false
+                ),
+                
+                onDismissRequest = {
+                    
+                }
+            ) {
+                matchingCats.forEach { cat ->
+                    DropdownMenuItem(
+                        text = {
+                            Text(
+                                text = cat.name
+                            )
+                        },
+
+                        onClick = {
+                            newCat = ""
+                            selectedCatsState.addChip(Chip(cat.name))
+                        }
+                    )
+                }
+            }
+        }
 
         Row(
             modifier = Modifier.fillMaxWidth(),

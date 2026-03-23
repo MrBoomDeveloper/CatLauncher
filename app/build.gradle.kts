@@ -76,6 +76,7 @@ dependencies {
     implementation("androidx.navigation3:navigation3-ui:1.0.1")
     implementation("com.cheonjaeung.compose.grid:grid:2.7.0")
     implementation("com.google.accompanist:accompanist-drawablepainter:0.37.3")
+    implementation("io.github.dokar3:chiptextfield-m3:0.7.2-alpha01")
     implementation("com.github.idapgroup:Snowfall:0.9.10")
     testImplementation(libs.junit)
     androidTestImplementation(libs.androidx.junit)
