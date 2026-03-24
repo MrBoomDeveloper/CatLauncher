@@ -8,6 +8,9 @@ import androidx.compose.runtime.rememberCoroutineScope
 import androidx.compose.runtime.retain.retain
 import androidx.compose.ui.platform.LocalContext
 import androidx.room3.Room
+import androidx.room3.RoomDatabase
+import androidx.sqlite.SQLiteConnection
+import androidx.sqlite.executeSQL
 import com.mrboomdev.catlauncher.data.db.CatLauncherDatabase
 import com.mrboomdev.catlauncher.data.entity.App
 import com.mrboomdev.catlauncher.data.entity.DBCat
@@ -24,13 +27,104 @@ class CatLauncher(private val context: Context) {
         context = context,
         klass = CatLauncherDatabase::class.java,
         name = "settings"
-    ).build()
+    ).apply {
+        addCallback(object : RoomDatabase.Callback() {
+            override suspend fun onCreate(connection: SQLiteConnection) {
+                connection.executeSQL("""
+                    INSERT INTO cat(
+                        id,
+                        name
+                    ) VALUES(
+                        ${DBCat.SYSTEM_ACCESSIBILITY},
+                        'Accessibility'
+                    )
+                """)
+
+                connection.executeSQL("""
+                    INSERT INTO cat(
+                        id,
+                        name
+                    ) VALUES(
+                        ${DBCat.SYSTEM_AUDIO},
+                        'Audio'
+                    )
+                """)
+
+                connection.executeSQL("""
+                    INSERT INTO cat(
+                        id,
+                        name
+                    ) VALUES(
+                        ${DBCat.SYSTEM_GAMES},
+                        'Games'
+                    )
+                """)
+
+                connection.executeSQL("""
+                    INSERT INTO cat(
+                        id,
+                        name
+                    ) VALUES(
+                        ${DBCat.SYSTEM_IMAGES},
+                        'Images'
+                    )
+                """)
+
+                connection.executeSQL("""
+                    INSERT INTO cat(
+                        id,
+                        name
+                    ) VALUES(
+                        ${DBCat.SYSTEM_MAPS},
+                        'Maps'
+                    )
+                """)
+
+                connection.executeSQL("""
+                    INSERT INTO cat(
+                        id,
+                        name
+                    ) VALUES(
+                        ${DBCat.SYSTEM_NEWS},
+                        'News'
+                    )
+                """)
+
+                connection.executeSQL("""
+                    INSERT INTO cat(
+                        id,
+                        name
+                    ) VALUES(
+                        ${DBCat.SYSTEM_PRODUCTIVITY},
+                        'Productivity'
+                    )
+                """)
+
+                connection.executeSQL("""
+                    INSERT INTO cat(
+                        id,
+                        name
+                    ) VALUES(
+                        ${DBCat.SYSTEM_SOCIAL},
+                        'Social'
+                    )
+                """)
+
+                connection.executeSQL("""
+                    INSERT INTO cat(
+                        id,
+                        name
+                    ) VALUES(
+                        ${DBCat.SYSTEM_VIDEOS},
+                        'Videos'
+                    )
+                """)
+            }
+        }) 
+    }.build()
     
     private val _isLoading = MutableStateFlow(true)
     val isLoading = _isLoading.asStateFlow()
-    
-    private val _cats = MutableStateFlow(emptyList<DBCat>())
-    val cats = _cats.asStateFlow()
 
     private val _installedApps = MutableStateFlow(emptyList<App>())
     val installedApps = _installedApps.asStateFlow()
@@ -65,6 +159,12 @@ class CatLauncher(private val context: Context) {
         started = SharingStarted.WhileSubscribed(), 
         initialValue = emptyList()
     )
+
+    val cats = database.cat.observeAll().stateIn(
+        scope = GlobalScope,
+        started = SharingStarted.WhileSubscribed(),
+        initialValue = emptyList()
+    )
     
     val catsWithApps = combine(
         cats,
@@ -76,76 +176,32 @@ class CatLauncher(private val context: Context) {
             }
             
             Pair(cat, matchingApps)
+        }.filter { (_, apps) ->
+            // We don't want to show empty categories
+            apps.isNotEmpty()
         }
     }.stateIn(
         scope = GlobalScope,
-        started = SharingStarted.WhileSubscribed(5000L),
+        started = SharingStarted.WhileSubscribed(),
+        initialValue = emptyList()
+    )
+    
+    val appsWithoutCats = customApps.map { apps ->
+        apps.filter { app ->
+            app.cats.isEmpty()
+        }
+    }.stateIn(
+        scope = GlobalScope,
+        started = SharingStarted.WhileSubscribed(),
         initialValue = emptyList()
     )
     
     suspend fun init() {
-        _cats.emit(listOf(
-            DBCat(
-                id = 0,
-                name = "Accessibility",
-                icon = R.drawable.ic_accessibility
-            ),
-
-            DBCat(
-                id = 1,
-                name = "Audio",
-                icon = R.drawable.ic_headphones_outlined
-            ),
-
-            DBCat(
-                id = 2,
-                name = "Games",
-                icon = R.drawable.ic_videogame_asset_outlined
-            ),
-
-            DBCat(
-                id = 3,
-                name = "Images",
-                icon = R.drawable.ic_image_outlined
-            ),
-
-            DBCat(
-                id = 4,
-                name = "Maps",
-                icon = R.drawable.ic_location_on_outlined
-            ),
-
-            DBCat(
-                id = 5,
-                name = "News",
-                icon = R.drawable.ic_newspaper_outlined
-            ),
-
-            DBCat(
-                id = 6,
-                name = "Productivity",
-                icon = R.drawable.ic_checklist
-            ),
-
-            DBCat(
-                id = 7,
-                name = "Social",
-                icon = R.drawable.ic_chat_outlined
-            ),
-            
-            DBCat(
-                id = 8,
-                name = "Videos",
-                icon = R.drawable.ic_movie_outlined
-            )
-        ))
-        
         _installedApps.emit(context.packageManager.queryIntentActivities(Intent(Intent.ACTION_MAIN).apply {
             addCategory(Intent.CATEGORY_LAUNCHER)
         }, PackageManager.MATCH_ALL).map { resolveInfo ->
             resolveInfo.toApp(
-                context = context,
-                cats = _cats.value.map { it.id }
+                context = context
             )
         })
         

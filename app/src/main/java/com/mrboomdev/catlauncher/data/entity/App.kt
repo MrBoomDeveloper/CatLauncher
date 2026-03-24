@@ -3,6 +3,7 @@ package com.mrboomdev.catlauncher.data.entity
 import android.content.ComponentName
 import android.content.Context
 import android.content.Intent
+import android.content.pm.ApplicationInfo
 import android.content.pm.ResolveInfo
 import androidx.compose.ui.graphics.painter.Painter
 import com.google.accompanist.drawablepainter.DrawablePainter
@@ -18,8 +19,7 @@ data class App(
 )
 
 fun ResolveInfo.toApp(
-    context: Context,
-    cats: List<Int>
+    context: Context
 ): App {
     val packageInfo = context.packageManager.getPackageInfo(
         activityInfo.applicationInfo.packageName, 
@@ -32,7 +32,24 @@ fun ResolveInfo.toApp(
         version = "${packageInfo.versionName} (${packageInfo.longVersionCode})",
         title = loadLabel(context.packageManager).toString(),
         icon = DrawablePainter(loadIcon(context.packageManager)),
-        cats = cats
+        cats = packageInfo.applicationInfo!!.category.let { category ->
+            when(category) {
+                ApplicationInfo.CATEGORY_GAME -> DBCat.SYSTEM_GAMES
+                ApplicationInfo.CATEGORY_MAPS -> DBCat.SYSTEM_MAPS
+                ApplicationInfo.CATEGORY_NEWS -> DBCat.SYSTEM_NEWS
+                ApplicationInfo.CATEGORY_AUDIO -> DBCat.SYSTEM_AUDIO
+                ApplicationInfo.CATEGORY_ACCESSIBILITY -> DBCat.SYSTEM_ACCESSIBILITY
+                ApplicationInfo.CATEGORY_IMAGE -> DBCat.SYSTEM_IMAGES
+                ApplicationInfo.CATEGORY_PRODUCTIVITY -> DBCat.SYSTEM_PRODUCTIVITY
+                ApplicationInfo.CATEGORY_SOCIAL -> DBCat.SYSTEM_SOCIAL
+                ApplicationInfo.CATEGORY_VIDEO -> DBCat.SYSTEM_VIDEOS
+                else -> null
+            }?.also { 
+                return@let listOf(it)
+            }
+            
+            emptyList()
+        }
     )
 }
 

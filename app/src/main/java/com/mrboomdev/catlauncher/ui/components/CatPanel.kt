@@ -129,6 +129,11 @@ fun CatPanel(
                         }
                     )
                     
+                    if(cat.id <= 0) {
+                        // These are system categories and they cannot be modified. Only removed.
+                        return@DropdownMenu
+                    }
+                    
                     DropdownMenuItem(
                         contentPadding = PaddingValues(
                             start = 16.dp,
