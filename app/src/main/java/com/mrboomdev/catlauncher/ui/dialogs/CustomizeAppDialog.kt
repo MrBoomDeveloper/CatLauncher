@@ -167,83 +167,87 @@ fun CustomizeAppDialog(
             )
         }
 
-        Text(
-            modifier = Modifier
-                .padding(horizontal = 16.dp)
-                .padding(top = 16.dp, bottom = 8.dp),
-            text = "Categories",
-            color = Color.White,
-
-            fontFamily = remember {
-                FontFamily(
-                    Font(
-                        resId = R.font.google_sans_flex,
-                        variationSettings = FontVariation.Settings(
-                            FontVariation.width(115f),
-                            FontVariation.weight(600),
-                            FontVariation.opticalSizing(12.sp)
-                        )
-                    )
-                )
-            }
-        )
-        
-        Box {
-            OutlinedChipTextField(
+        if(false) {
+            Text(
                 modifier = Modifier
                     .padding(horizontal = 16.dp)
-                    .padding(bottom = 8.dp),
-                shape = RoundedCornerShape(8.dp),
-                state = selectedCatsState,
-                value = newCat,
+                    .padding(top = 16.dp, bottom = 8.dp),
+                text = "Categories",
+                color = Color.White,
 
-                onValueChange = {
-                    newCat = it
-                },
-
-                onSubmit = {
-                    Chip(it)
+                fontFamily = remember {
+                    FontFamily(
+                        Font(
+                            resId = R.font.google_sans_flex,
+                            variationSettings = FontVariation.Settings(
+                                FontVariation.width(115f),
+                                FontVariation.weight(600),
+                                FontVariation.opticalSizing(12.sp)
+                            )
+                        )
+                    )
                 }
             )
-            
-            val matchingCats by remember(newCat) {
-                catLauncher.cats.map { cats ->
-                    cats.filter { cat ->
-                        cat.name.contains(newCat, ignoreCase = true) && selectedCatsState.chips.none { chip ->
-                            chip.text == cat.name
-                        }
-                    }.sortedBy { cat ->
-                        cat.name
+        }
+        
+        if(false) {
+            Box {
+                OutlinedChipTextField(
+                    modifier = Modifier
+                        .padding(horizontal = 16.dp)
+                        .padding(bottom = 8.dp),
+                    shape = RoundedCornerShape(8.dp),
+                    state = selectedCatsState,
+                    value = newCat,
+
+                    onValueChange = {
+                        newCat = it
+                    },
+
+                    onSubmit = {
+                        Chip(it)
                     }
-                }
-            }.collectAsState(emptyList())
+                )
 
-            DropdownMenu(
-                expanded = newCat.isNotBlank() && matchingCats.isNotEmpty(),
-                
-                properties = PopupProperties(
-                    dismissOnBackPress = true,
-                    dismissOnClickOutside = true,
-                    focusable = false
-                ),
-                
-                onDismissRequest = {
-                    
-                }
-            ) {
-                matchingCats.forEach { cat ->
-                    DropdownMenuItem(
-                        text = {
-                            Text(
-                                text = cat.name
-                            )
-                        },
-
-                        onClick = {
-                            newCat = ""
-                            selectedCatsState.addChip(Chip(cat.name))
+                val matchingCats by remember(newCat) {
+                    catLauncher.cats.map { cats ->
+                        cats.filter { cat ->
+                            cat.name.contains(newCat, ignoreCase = true) && selectedCatsState.chips.none { chip ->
+                                chip.text == cat.name
+                            }
+                        }.sortedBy { cat ->
+                            cat.name
                         }
-                    )
+                    }
+                }.collectAsState(emptyList())
+
+                DropdownMenu(
+                    expanded = newCat.isNotBlank() && matchingCats.isNotEmpty(),
+
+                    properties = PopupProperties(
+                        dismissOnBackPress = true,
+                        dismissOnClickOutside = true,
+                        focusable = false
+                    ),
+
+                    onDismissRequest = {
+
+                    }
+                ) {
+                    matchingCats.forEach { cat ->
+                        DropdownMenuItem(
+                            text = {
+                                Text(
+                                    text = cat.name
+                                )
+                            },
+
+                            onClick = {
+                                newCat = ""
+                                selectedCatsState.addChip(Chip(cat.name))
+                            }
+                        )
+                    }
                 }
             }
         }

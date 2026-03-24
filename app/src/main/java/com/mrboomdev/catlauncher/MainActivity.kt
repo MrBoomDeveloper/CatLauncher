@@ -255,31 +255,33 @@ private fun App() {
                                         }
                                     )
                                     
-                                    DropdownMenuItem(
-                                        contentPadding = PaddingValues(
-                                            start = 16.dp,
-                                            end = 32.dp
-                                        ),
+                                    if(false) {
+                                        DropdownMenuItem(
+                                            contentPadding = PaddingValues(
+                                                start = 16.dp,
+                                                end = 32.dp
+                                            ),
 
-                                        leadingIcon = {
-                                            Icon(
-                                                modifier = Modifier.size(24.dp),
-                                                painter = painterResource(R.drawable.ic_settings_outlined),
-                                                contentDescription = null
-                                            )
-                                        },
-                                        
-                                        text = {
-                                            Text(
-                                                fontFamily = GoogleSansFlex.regular,
-                                                text = "Settings"
-                                            )
-                                        },
-                                        
-                                        onClick = {
-                                            
-                                        }
-                                    )
+                                            leadingIcon = {
+                                                Icon(
+                                                    modifier = Modifier.size(24.dp),
+                                                    painter = painterResource(R.drawable.ic_settings_outlined),
+                                                    contentDescription = null
+                                                )
+                                            },
+
+                                            text = {
+                                                Text(
+                                                    fontFamily = GoogleSansFlex.regular,
+                                                    text = "Settings"
+                                                )
+                                            },
+
+                                            onClick = {
+
+                                            }
+                                        )
+                                    }
                                 }
                             }
                         }

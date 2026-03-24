@@ -7,6 +7,7 @@ import androidx.compose.material3.*
 import androidx.compose.runtime.*
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.draw.alpha
 import androidx.compose.ui.draw.clip
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.platform.LocalContext
@@ -89,7 +90,11 @@ fun CatPanel(
                 CompositionLocalProvider(
                     LocalContentColor provides Color.White
                 ) {
-                    IconButton({ showOptions = true }) {
+                    IconButton(
+                        modifier = Modifier.alpha(0f),
+                        enabled = false,
+                        onClick = { showOptions = true }
+                    ) {
                         Icon(
                             modifier = Modifier.size(24.dp),
                             painter = painterResource(R.drawable.ic_more_vert),
@@ -129,63 +134,62 @@ fun CatPanel(
                         }
                     )
                     
-                    if(cat.id <= 0) {
+                    if(cat.id > 0) {
                         // These are system categories and they cannot be modified. Only removed.
-                        return@DropdownMenu
+
+                        DropdownMenuItem(
+                            contentPadding = PaddingValues(
+                                start = 16.dp,
+                                end = 32.dp
+                            ),
+
+                            leadingIcon = {
+                                Icon(
+                                    modifier = Modifier.size(24.dp),
+                                    painter = painterResource(R.drawable.ic_image_outlined),
+                                    contentDescription = null
+                                )
+                            },
+
+                            text = {
+                                Text(
+                                    fontFamily = GoogleSansFlex.regular,
+                                    text = "Change icon"
+                                )
+                            },
+
+                            onClick = {
+
+                            }
+                        )
+
+                        DropdownMenuItem(
+                            contentPadding = PaddingValues(
+                                start = 16.dp,
+                                end = 32.dp
+                            ),
+
+                            leadingIcon = {
+                                Icon(
+                                    modifier = Modifier.size(24.dp),
+                                    painter = painterResource(R.drawable.ic_label_outlined),
+                                    contentDescription = null
+                                )
+                            },
+
+                            text = {
+                                Text(
+                                    fontFamily = GoogleSansFlex.regular,
+                                    text = "Rename"
+                                )
+                            },
+
+                            onClick = {
+
+                            }
+                        )
                     }
                     
-                    DropdownMenuItem(
-                        contentPadding = PaddingValues(
-                            start = 16.dp,
-                            end = 32.dp
-                        ),
-
-                        leadingIcon = {
-                            Icon(
-                                modifier = Modifier.size(24.dp),
-                                painter = painterResource(R.drawable.ic_image_outlined),
-                                contentDescription = null
-                            )
-                        },
-                        
-                        text = {
-                            Text(
-                                fontFamily = GoogleSansFlex.regular,
-                                text = "Change icon"
-                            )
-                        },
-
-                        onClick = {
-
-                        }
-                    )
-
-                    DropdownMenuItem(
-                        contentPadding = PaddingValues(
-                            start = 16.dp,
-                            end = 32.dp
-                        ),
-                        
-                        leadingIcon = {
-                            Icon(
-                                modifier = Modifier.size(24.dp),
-                                painter = painterResource(R.drawable.ic_label_outlined),
-                                contentDescription = null
-                            )
-                        },
-                        
-                        text = {
-                            Text(
-                                fontFamily = GoogleSansFlex.regular,
-                                text = "Rename"
-                            )
-                        },
-
-                        onClick = {
-
-                        }
-                    )
-
                     DropdownMenuItem(
                         contentPadding = PaddingValues(
                             start = 16.dp,
