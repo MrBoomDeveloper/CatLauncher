@@ -9,6 +9,7 @@ import androidx.activity.enableEdgeToEdge
 import androidx.compose.animation.animateColorAsState
 import androidx.compose.foundation.Image
 import androidx.compose.foundation.LocalOverscrollFactory
+import androidx.compose.foundation.background
 import androidx.compose.foundation.interaction.MutableInteractionSource
 import androidx.compose.foundation.interaction.PressInteraction
 import androidx.compose.foundation.layout.*
@@ -17,6 +18,7 @@ import androidx.compose.foundation.pager.VerticalPager
 import androidx.compose.foundation.pager.rememberPagerState
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.foundation.text.BasicTextField
+import androidx.compose.foundation.text.KeyboardActions
 import androidx.compose.foundation.text.KeyboardOptions
 import androidx.compose.material3.*
 import androidx.compose.runtime.*
@@ -33,12 +35,17 @@ import androidx.compose.ui.platform.LocalLayoutDirection
 import androidx.compose.ui.platform.LocalSoftwareKeyboardController
 import androidx.compose.ui.res.painterResource
 import androidx.compose.ui.text.ExperimentalTextApi
+import androidx.compose.ui.text.font.Font
+import androidx.compose.ui.text.font.FontFamily
+import androidx.compose.ui.text.font.FontVariation
 import androidx.compose.ui.text.input.ImeAction
 import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.Velocity
 import androidx.compose.ui.unit.dp
+import androidx.compose.ui.unit.sp
 import androidx.compose.ui.window.Dialog
 import com.idapgroup.snowfall.snowfall
+import com.mrboomdev.catlauncher.data.entity.intent
 import com.mrboomdev.catlauncher.ui.screens.CatsScreen
 import com.mrboomdev.catlauncher.ui.screens.HomeScreen
 import com.mrboomdev.catlauncher.ui.theme.CatLauncherTheme
@@ -69,6 +76,20 @@ private fun App() {
     val catsListState = rememberLazyListState()
     val searchFocusRequester = remember { FocusRequester() }
     val searchInteractionSource = remember { MutableInteractionSource() }
+
+    val filteredCats = remember(searchQuery, catsWithApps) {
+        catsWithApps.map { (cat, apps) ->
+            cat to apps.filter { app ->
+                app.title.trim().contains(
+                    other = searchQuery.trim(),
+                    ignoreCase = true
+                )
+            }
+        }.filter { (_, apps) ->
+            // Hide empty categories
+            apps.isNotEmpty()
+        }
+    }
     
     LaunchedEffect(pagerState.currentPage) {
         if(pagerState.currentPage == 0) {
@@ -170,6 +191,12 @@ private fun App() {
                                 keyboardOptions = KeyboardOptions(
                                     imeAction = ImeAction.Search
                                 ),
+                                
+                                keyboardActions = KeyboardActions { 
+                                    if(filteredCats.isNotEmpty()) {
+                                        context.startActivity(filteredCats[0].second[0].intent)
+                                    }
+                                },
                                 
                                 decorationBox = {
                                     it()
@@ -281,25 +308,57 @@ private fun App() {
                 ) { index ->
                     when(index) {
                         0 -> HomeScreen(contentPadding)
-                        1 -> CompositionLocalProvider(LocalOverscrollFactory provides null) {
-                            CatsScreen(
-                                listState = catsListState,
-                                contentPadding = WindowInsets(
-                                    left = contentPadding.calculateLeftPadding(LocalLayoutDirection.current),
-                                    top = contentPadding.calculateTopPadding(),
-                                    right = contentPadding.calculateRightPadding(LocalLayoutDirection.current),
-                                    bottom = contentPadding.calculateBottomPadding()
-                                ).add(WindowInsets(4.dp, 4.dp, 4.dp, 4.dp)).asPaddingValues(),
-                                
-                                catsWithApps = catsWithApps.map { (cat, apps) ->
-                                    cat to apps.filter { app -> 
-                                        app.title.trim().contains(
-                                            other = searchQuery.trim(), 
-                                            ignoreCase = true
-                                        )
-                                    }
+                        1 -> {
+                            if(filteredCats.isEmpty()) {
+                                Column(
+                                    modifier = Modifier
+                                        .background(Color(0x99000000))
+                                        .padding(vertical = 4.dp)
+                                        .fillMaxSize()
+                                        .wrapContentSize(Alignment.Center),
+                                    horizontalAlignment = Alignment.CenterHorizontally,
+                                    verticalArrangement = Arrangement.spacedBy(16.dp)
+                                ) {
+                                    Text(
+                                        style = MaterialTheme.typography.displayLarge,
+                                        color = Color.White,
+                                        text = "._.",
+                                        
+                                        fontFamily = remember { 
+                                            FontFamily(
+                                                Font(
+                                                    resId = R.font.google_sans_flex,
+                                                    variationSettings = FontVariation.Settings(
+                                                        FontVariation.weight(800),
+                                                        FontVariation.opticalSizing(57.sp)
+                                                    )
+                                                )
+                                            )
+                                        }
+                                    )
+                                    
+                                    Text(
+                                        fontFamily = GoogleSansFlex.regular,
+                                        color = Color.White,
+                                        text = "Nothing was found"
+                                    )
                                 }
-                            )
+                                
+                                return@VerticalPager
+                            }
+                            
+                            CompositionLocalProvider(LocalOverscrollFactory provides null) {
+                                CatsScreen(
+                                    listState = catsListState,
+                                    catsWithApps = filteredCats,
+                                    contentPadding = WindowInsets(
+                                        left = contentPadding.calculateLeftPadding(LocalLayoutDirection.current),
+                                        top = contentPadding.calculateTopPadding(),
+                                        right = contentPadding.calculateRightPadding(LocalLayoutDirection.current),
+                                        bottom = contentPadding.calculateBottomPadding()
+                                    ).add(WindowInsets(4.dp, 4.dp, 4.dp, 4.dp)).asPaddingValues()
+                                )
+                            }
                         }
 
                         else -> throw IllegalStateException("Illegal page $index!")

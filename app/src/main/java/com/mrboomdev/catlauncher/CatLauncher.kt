@@ -165,20 +165,10 @@ class CatLauncher(private val context: Context) {
         started = SharingStarted.WhileSubscribed(),
         initialValue = emptyList()
     )
-    
-    val catsWithApps = combine(
-        cats,
-        customApps
-    ) { currentCats, currentApps ->
-        currentCats.map { cat ->
-            val matchingApps = currentApps.filter { app ->
-                cat.id in app.cats
-            }
-            
-            Pair(cat, matchingApps)
-        }.filter { (_, apps) ->
-            // We don't want to show empty categories
-            apps.isNotEmpty()
+
+    val appsWithoutCats = customApps.map { apps ->
+        apps.filter { app ->
+            app.cats.isEmpty()
         }
     }.stateIn(
         scope = GlobalScope,
@@ -186,10 +176,25 @@ class CatLauncher(private val context: Context) {
         initialValue = emptyList()
     )
     
-    val appsWithoutCats = customApps.map { apps ->
-        apps.filter { app ->
-            app.cats.isEmpty()
+    val catsWithApps = combine(
+        cats,
+        customApps,
+        appsWithoutCats
+    ) { currentCats, currentApps, appsWithoutCats ->
+        val filteredCats = currentCats.map { cat ->
+            val matchingApps = currentApps.filter { app ->
+                cat.id in app.cats
+            }
+            
+            cat to matchingApps
+        }.filter { (_, apps) ->
+            // We don't want to show empty categories
+            apps.isNotEmpty()
         }
+        
+        if(appsWithoutCats.isEmpty()) {
+            filteredCats
+        } else filteredCats + (DBCat(0, "Uncategorized") to appsWithoutCats)
     }.stateIn(
         scope = GlobalScope,
         started = SharingStarted.WhileSubscribed(),

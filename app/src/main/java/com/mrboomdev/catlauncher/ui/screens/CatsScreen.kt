@@ -41,26 +41,7 @@ fun CatsScreen(
         verticalArrangement = Arrangement.spacedBy(8.dp),
         overscrollEffect = null,
         contentPadding = contentPadding
-    ) { 
-        item(
-            key = "uncategorized"
-        ) {
-            CatPanel(
-                modifier = Modifier
-                    .fillMaxWidth()
-                    .animateItem(),
-                
-                cat = remember {
-                    DBCat(
-                        id = 0,
-                        name = "Uncategorized"
-                    )
-                },
-                
-                apps = uncategorizedApps
-            )
-        }
-        
+    ) {
         items(
             key = { it.first.id },
             items = catsWithApps
