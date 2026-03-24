@@ -12,6 +12,7 @@ import androidx.compose.foundation.LocalOverscrollFactory
 import androidx.compose.foundation.interaction.MutableInteractionSource
 import androidx.compose.foundation.interaction.PressInteraction
 import androidx.compose.foundation.layout.*
+import androidx.compose.foundation.lazy.rememberLazyListState
 import androidx.compose.foundation.pager.VerticalPager
 import androidx.compose.foundation.pager.rememberPagerState
 import androidx.compose.foundation.shape.RoundedCornerShape
@@ -32,9 +33,6 @@ import androidx.compose.ui.platform.LocalLayoutDirection
 import androidx.compose.ui.platform.LocalSoftwareKeyboardController
 import androidx.compose.ui.res.painterResource
 import androidx.compose.ui.text.ExperimentalTextApi
-import androidx.compose.ui.text.font.Font
-import androidx.compose.ui.text.font.FontFamily
-import androidx.compose.ui.text.font.FontVariation
 import androidx.compose.ui.text.input.ImeAction
 import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.Velocity
@@ -44,6 +42,7 @@ import com.idapgroup.snowfall.snowfall
 import com.mrboomdev.catlauncher.ui.screens.CatsScreen
 import com.mrboomdev.catlauncher.ui.screens.HomeScreen
 import com.mrboomdev.catlauncher.ui.theme.CatLauncherTheme
+import com.mrboomdev.catlauncher.ui.theme.GoogleSansFlex
 import kotlinx.coroutines.launch
 
 class MainActivity : ComponentActivity() {
@@ -56,7 +55,7 @@ class MainActivity : ComponentActivity() {
     }
 }
 
-@OptIn(ExperimentalTextApi::class)
+@OptIn(ExperimentalTextApi::class, ExperimentalMaterial3ExpressiveApi::class)
 @Composable
 private fun App() {
     val context = LocalContext.current
@@ -67,12 +66,14 @@ private fun App() {
     var searchQuery by rememberSaveable { mutableStateOf("") }
     val pagerState = rememberPagerState { 2 }
     val coroutineScope = rememberCoroutineScope()
+    val catsListState = rememberLazyListState()
     val searchFocusRequester = remember { FocusRequester() }
     val searchInteractionSource = remember { MutableInteractionSource() }
     
     LaunchedEffect(pagerState.currentPage) {
         if(pagerState.currentPage == 0) {
             searchQuery = ""
+            catsListState.animateScrollToItem(0)
         }
     }
     
@@ -94,11 +95,11 @@ private fun App() {
     
     CatLauncherTheme {
         if(isLoading) {
-            Dialog(
-                onDismissRequest = {}
-            ) {
-                CircularProgressIndicator()
+            Dialog({}) {
+                LoadingIndicator()
             }
+            
+            return@CatLauncherTheme
         }
 
         Box {
@@ -151,17 +152,6 @@ private fun App() {
                                 painter = painterResource(R.drawable.ic_search),
                                 contentDescription = null
                             )
-                            
-                            val queryFontFamily = remember {
-                                FontFamily(
-                                    Font(
-                                        resId = R.font.google_sans_flex,
-                                        variationSettings = FontVariation.Settings(
-                                            FontVariation.weight(500)
-                                        )
-                                    )
-                                )
-                            }
 
                             BasicTextField(
                                 modifier = Modifier
@@ -173,7 +163,7 @@ private fun App() {
                                 onValueChange = { text -> searchQuery = text },
                                 
                                 textStyle = LocalTextStyle.current.copy(
-                                    fontFamily = queryFontFamily,
+                                    fontFamily = GoogleSansFlex.regular,
                                     color = LocalContentColor.current
                                 ),
                                 
@@ -190,7 +180,7 @@ private fun App() {
                                     
                                     Text(
                                         text = "Search",
-                                        fontFamily = queryFontFamily
+                                        fontFamily = GoogleSansFlex.regular
                                     )
                                 }
                             )
@@ -227,6 +217,7 @@ private fun App() {
                                         
                                         text = {
                                             Text(
+                                                fontFamily = GoogleSansFlex.regular,
                                                 text = "Wallpaper"
                                             )
                                         },
@@ -253,6 +244,7 @@ private fun App() {
                                         
                                         text = {
                                             Text(
+                                                fontFamily = GoogleSansFlex.regular,
                                                 text = "Settings"
                                             )
                                         },
@@ -291,6 +283,7 @@ private fun App() {
                         0 -> HomeScreen(contentPadding)
                         1 -> CompositionLocalProvider(LocalOverscrollFactory provides null) {
                             CatsScreen(
+                                listState = catsListState,
                                 contentPadding = WindowInsets(
                                     left = contentPadding.calculateLeftPadding(LocalLayoutDirection.current),
                                     top = contentPadding.calculateTopPadding(),

@@ -6,6 +6,7 @@ plugins {
     alias(libs.plugins.android.application)
     alias(libs.plugins.kotlin.android)
     alias(libs.plugins.kotlin.compose)
+    id("com.google.devtools.ksp") version "2.3.6"
 }
 
 val keystoreProperties = Properties().apply {
@@ -78,6 +79,7 @@ dependencies {
     implementation("com.google.accompanist:accompanist-drawablepainter:0.37.3")
     implementation("io.github.dokar3:chiptextfield-m3:0.7.2-alpha01")
     implementation("com.github.idapgroup:Snowfall:0.9.10")
+    ksp("androidx.room3:room3-compiler:3.0.0-alpha01")
     testImplementation(libs.junit)
     androidTestImplementation(libs.androidx.junit)
     androidTestImplementation(libs.androidx.espresso.core)

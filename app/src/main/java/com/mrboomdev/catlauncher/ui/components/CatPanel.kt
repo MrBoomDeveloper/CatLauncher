@@ -1,6 +1,5 @@
 package com.mrboomdev.catlauncher.ui.components
 
-import android.content.Intent
 import androidx.compose.foundation.background
 import androidx.compose.foundation.layout.*
 import androidx.compose.foundation.shape.RoundedCornerShape
@@ -23,14 +22,16 @@ import com.cheonjaeung.compose.grid.SimpleGridCells
 import com.cheonjaeung.compose.grid.VerticalGrid
 import com.mrboomdev.catlauncher.R
 import com.mrboomdev.catlauncher.data.entity.App
-import com.mrboomdev.catlauncher.data.entity.Cat
+import com.mrboomdev.catlauncher.data.entity.DBCat
+import com.mrboomdev.catlauncher.data.entity.intent
 import com.mrboomdev.catlauncher.ui.dialogs.CustomizeAppDialog
+import com.mrboomdev.catlauncher.ui.theme.GoogleSansFlex
 
 @OptIn(ExperimentalTextApi::class)
 @Composable
 fun CatPanel(
     modifier: Modifier = Modifier,
-    cat: Cat,
+    cat: DBCat,
     apps: List<App>
 ) {
     val context = LocalContext.current
@@ -47,10 +48,10 @@ fun CatPanel(
         modifier = modifier
             .clip(RoundedCornerShape(16.dp))
             .background(Color(0x99000000))
-            .padding(horizontal = 16.dp, vertical = 4.dp),
-        verticalArrangement = Arrangement.spacedBy(8.dp)
+            .padding(vertical = 4.dp)
     ) {
         Row(
+            modifier = Modifier.padding(horizontal = 16.dp),
             verticalAlignment = Alignment.CenterVertically,
             horizontalArrangement = Arrangement.spacedBy(12.dp)
         ) {
@@ -118,6 +119,7 @@ fun CatPanel(
 
                         text = {
                             Text(
+                                fontFamily = GoogleSansFlex.regular,
                                 text = "Reorder"
                             )
                         },
@@ -143,6 +145,7 @@ fun CatPanel(
                         
                         text = {
                             Text(
+                                fontFamily = GoogleSansFlex.regular,
                                 text = "Change icon"
                             )
                         },
@@ -168,6 +171,7 @@ fun CatPanel(
                         
                         text = {
                             Text(
+                                fontFamily = GoogleSansFlex.regular,
                                 text = "Rename"
                             )
                         },
@@ -193,6 +197,7 @@ fun CatPanel(
                         
                         text = {
                             Text(
+                                fontFamily = GoogleSansFlex.regular,
                                 text = "Delete"
                             )
                         },
@@ -206,9 +211,8 @@ fun CatPanel(
         }
 
         VerticalGrid(
-            columns = SimpleGridCells.Fixed(5),
-            verticalArrangement = Arrangement.spacedBy(16.dp),
-            horizontalArrangement = Arrangement.spacedBy(16.dp)
+            modifier = Modifier.padding(horizontal = 8.dp),
+            columns = SimpleGridCells.Adaptive(minSize = 72.dp)
         ) {
             for(app in apps) {
                 AppIcon(
@@ -233,7 +237,7 @@ private fun CatPanelPreview() {
     val icon = painterResource(R.drawable.bocchi)
     
     val cat = remember { 
-        Cat(
+        DBCat(
             id = 0,
             name = "Chat"
         )
@@ -242,9 +246,10 @@ private fun CatPanelPreview() {
     val apps = remember {
         List(15) { i ->
             App(
+                packageName = "",
+                activityName = "",
                 title = "App $i",
                 icon = icon,
-                intent = Intent(),
                 cats = emptyList()
             )
         }

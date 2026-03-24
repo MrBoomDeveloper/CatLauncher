@@ -10,6 +10,7 @@ import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.foundation.text.KeyboardOptions
 import androidx.compose.foundation.text.input.TextFieldLineLimits
 import androidx.compose.foundation.text.input.rememberTextFieldState
+import androidx.compose.foundation.text.selection.SelectionContainer
 import androidx.compose.material3.*
 import androidx.compose.runtime.*
 import androidx.compose.ui.Alignment
@@ -19,13 +20,17 @@ import androidx.compose.ui.layout.ContentScale
 import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.res.painterResource
 import androidx.compose.ui.text.ExperimentalTextApi
+import androidx.compose.ui.text.SpanStyle
+import androidx.compose.ui.text.buildAnnotatedString
 import androidx.compose.ui.text.font.Font
 import androidx.compose.ui.text.font.FontFamily
 import androidx.compose.ui.text.font.FontVariation
 import androidx.compose.ui.text.input.ImeAction
+import androidx.compose.ui.text.withStyle
 import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
+import androidx.compose.ui.window.Dialog
 import androidx.compose.ui.window.PopupProperties
 import androidx.core.content.FileProvider
 import com.dokar.chiptextfield.Chip
@@ -34,22 +39,30 @@ import com.dokar.chiptextfield.rememberChipTextFieldState
 import com.mrboomdev.catlauncher.R
 import com.mrboomdev.catlauncher.currentCatLauncher
 import com.mrboomdev.catlauncher.data.entity.App
+import com.mrboomdev.catlauncher.data.entity.DBAppCustomization
+import com.mrboomdev.catlauncher.data.entity.intent
+import com.mrboomdev.catlauncher.ui.theme.GoogleSansFlex
+import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.flow.map
+import kotlinx.coroutines.launch
 import java.io.File
 import java.io.FileInputStream
 import java.io.FileOutputStream
 import java.util.zip.ZipEntry
 import java.util.zip.ZipOutputStream
 
-@OptIn(ExperimentalMaterial3Api::class, ExperimentalTextApi::class)
+@OptIn(ExperimentalMaterial3Api::class, ExperimentalTextApi::class, ExperimentalMaterial3ExpressiveApi::class)
 @Composable
 fun CustomizeAppDialog(
     onDismissRequest: () -> Unit,
     app: App
 ) {
     val context = LocalContext.current
+    val catLauncher = currentCatLauncher()
+    val coroutineScope = rememberCoroutineScope()
     val newTitle = rememberTextFieldState()
     val selectedCatsState = rememberChipTextFieldState<Chip>()
+    var isLoading by remember { mutableStateOf(false) }
     var newCat by remember { mutableStateOf("") }
 
     val font = remember {
@@ -63,6 +76,12 @@ fun CustomizeAppDialog(
                 )
             )
         )
+    }
+    
+    if(isLoading) {
+        Dialog({}) {
+            LoadingIndicator()
+        }
     }
     
     ModalBottomSheet(
@@ -152,13 +171,15 @@ fun CustomizeAppDialog(
                 }
             )
             
-            val matchingCats by currentCatLauncher().cats.map { cats ->
-                cats.filter { cat ->
-                    cat.name.contains(newCat, ignoreCase = true) && selectedCatsState.chips.none { chip -> 
-                        chip.text == cat.name
+            val matchingCats by remember(newCat) {
+                catLauncher.cats.map { cats ->
+                    cats.filter { cat ->
+                        cat.name.contains(newCat, ignoreCase = true) && selectedCatsState.chips.none { chip ->
+                            chip.text == cat.name
+                        }
+                    }.sortedBy { cat ->
+                        cat.name
                     }
-                }.sortedBy { cat ->
-                    cat.name
                 }
             }.collectAsState(emptyList())
 
@@ -191,6 +212,37 @@ fun CustomizeAppDialog(
                 }
             }
         }
+        
+        SelectionContainer(
+            modifier = Modifier
+                .padding(
+                    horizontal = 16.dp,
+                    vertical = 8.dp
+                )
+        ) {
+            Text(
+                style = MaterialTheme.typography.bodyLarge,
+                fontFamily = GoogleSansFlex.regular,
+                text = buildAnnotatedString {
+                    append("Class: ")
+                    withStyle(SpanStyle(color = MaterialTheme.colorScheme.secondary)) {
+                        append(app.packageName)
+                        append("/")
+                        
+                        if(app.activityName.startsWith(app.packageName)) {
+                            append(app.activityName.substringAfter(app.packageName))
+                        } else {
+                            append(app.activityName)
+                        }
+                    }
+
+                    append("\nVersion: ")
+                    withStyle(SpanStyle(color = MaterialTheme.colorScheme.secondary)) {
+                        append(app.version)
+                    }
+                }
+            )
+        }
 
         Row(
             modifier = Modifier.fillMaxWidth(),
@@ -209,14 +261,14 @@ fun CustomizeAppDialog(
                 )
             }
             
-            for(action in arrayOf(
+            for(action in arrayOf<Triple<Int, String, () -> Unit>>(
                 Triple(
                     R.drawable.ic_settings_outlined,
                     "Settings"
                 ) {
                     context.startActivity(Intent(
                         Settings.ACTION_APPLICATION_DETAILS_SETTINGS, 
-                        Uri.fromParts("package", app.intent.component!!.packageName, null)
+                        Uri.fromParts("package", app.packageName, null)
                     ))
                 },
 
@@ -224,7 +276,7 @@ fun CustomizeAppDialog(
                     R.drawable.ic_share_outlined,
                     "Share"
                 ) {
-                    shareApp(context, app.intent.component!!.packageName)
+                    shareApp(context, app.packageName)
                 },
 
                 Triple(
@@ -241,7 +293,20 @@ fun CustomizeAppDialog(
                     R.drawable.ic_block,
                     "Hide"
                 ) {
-
+                    isLoading = true
+                    
+                    coroutineScope.launch(Dispatchers.IO) {
+                        catLauncher.database.appCustomization.insert(
+                            DBAppCustomization(
+                                packageName = app.intent.component!!.packageName,
+                                activityName = app.intent.component!!.className,
+                                isHidden = true,
+                                customTitle = null
+                            )
+                        )
+                        
+                        onDismissRequest()
+                    }
                 }
             )) {
                 Surface(
@@ -329,9 +394,10 @@ private fun CustomizeAppDialogPreview() {
     
     val app = remember {
         App(
+            packageName = "",
+            activityName = "",
             title = "CatLauncher",
             icon = icon,
-            intent = Intent(),
             cats = emptyList()
         )
     }

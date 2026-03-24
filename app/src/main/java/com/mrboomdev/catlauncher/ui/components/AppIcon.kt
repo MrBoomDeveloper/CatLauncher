@@ -1,12 +1,8 @@
 package com.mrboomdev.catlauncher.ui.components
 
-import android.content.Intent
 import androidx.compose.foundation.Image
 import androidx.compose.foundation.combinedClickable
-import androidx.compose.foundation.layout.Arrangement
-import androidx.compose.foundation.layout.Column
-import androidx.compose.foundation.layout.aspectRatio
-import androidx.compose.foundation.layout.fillMaxWidth
+import androidx.compose.foundation.layout.*
 import androidx.compose.foundation.shape.CircleShape
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.foundation.text.TextAutoSize
@@ -50,7 +46,7 @@ fun AppIcon(
                 .combinedClickable(
                     onClick = onClick,
                     onLongClick = onLongClick
-                ),
+                ).padding(8.dp),
             horizontalAlignment = Alignment.CenterHorizontally,
             verticalArrangement = Arrangement.spacedBy(6.dp)
         ) {
@@ -103,9 +99,10 @@ private fun AppIconPreview() {
     
     val app = remember {
         App(
+            packageName = "",
+            activityName = "",
             title = "CatLauncher",
             icon = icon,
-            intent = Intent(),
             cats = emptyList()
         )
     }

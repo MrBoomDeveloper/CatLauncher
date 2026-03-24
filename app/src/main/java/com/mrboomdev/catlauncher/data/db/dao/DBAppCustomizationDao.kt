@@ -4,13 +4,17 @@ import androidx.room3.Dao
 import androidx.room3.Insert
 import androidx.room3.OnConflictStrategy
 import androidx.room3.Query
-import com.mrboomdev.catlauncher.data.db.entity.DBAppCustomization
+import com.mrboomdev.catlauncher.data.entity.DBAppCustomization
+import kotlinx.coroutines.flow.Flow
 
 @Dao
 interface DBAppCustomizationDao {
     @Insert(onConflict = OnConflictStrategy.REPLACE)
-    fun insert(item: DBAppCustomization)
+    suspend fun insert(item: DBAppCustomization)
     
     @Query("SELECT * FROM app_customization")
-    fun getAll(): List<DBAppCustomization>
+    suspend fun getAll(): List<DBAppCustomization>
+
+    @Query("SELECT * FROM app_customization")
+    fun observeAll(): Flow<List<DBAppCustomization>>
 }

@@ -1,4 +1,4 @@
-package com.mrboomdev.catlauncher.data.db.entity
+package com.mrboomdev.catlauncher.data.entity
 
 import androidx.room3.ColumnInfo
 import androidx.room3.Entity
