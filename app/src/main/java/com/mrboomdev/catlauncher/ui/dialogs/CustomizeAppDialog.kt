@@ -40,7 +40,6 @@ import com.mrboomdev.catlauncher.R
 import com.mrboomdev.catlauncher.currentCatLauncher
 import com.mrboomdev.catlauncher.data.entity.App
 import com.mrboomdev.catlauncher.data.entity.DBAppCustomization
-import com.mrboomdev.catlauncher.data.entity.intent
 import com.mrboomdev.catlauncher.ui.theme.GoogleSansFlex
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.flow.map
@@ -60,8 +59,8 @@ fun CustomizeAppDialog(
     val context = LocalContext.current
     val catLauncher = currentCatLauncher()
     val coroutineScope = rememberCoroutineScope()
-    val newTitle = rememberTextFieldState()
     val selectedCatsState = rememberChipTextFieldState<Chip>()
+    val newTitle = rememberTextFieldState(if(app.title != app.ogTitle) app.title else "")
     var isLoading by remember { mutableStateOf(false) }
     var newCat by remember { mutableStateOf("") }
 
@@ -85,7 +84,43 @@ fun CustomizeAppDialog(
     }
     
     ModalBottomSheet(
-        onDismissRequest = onDismissRequest
+        onDismissRequest = {
+            val newTitle = newTitle.text.toString()
+            
+            if(newTitle.isBlank() && app.title != app.ogTitle) {
+                coroutineScope.launch(Dispatchers.IO) {
+                    catLauncher.database.appCustomization.insert(
+                        DBAppCustomization(
+                            packageName = app.packageName,
+                            activityName = app.activityName,
+                            isHidden = false,
+                            customTitle = null
+                        )
+                    )
+
+                    onDismissRequest()
+                }
+
+                return@ModalBottomSheet
+            } else if(newTitle.isNotBlank() && newTitle != app.title) {
+                coroutineScope.launch(Dispatchers.IO) {
+                    catLauncher.database.appCustomization.insert(
+                        DBAppCustomization(
+                            packageName = app.packageName,
+                            activityName = app.activityName,
+                            isHidden = false,
+                            customTitle = newTitle
+                        )
+                    )
+
+                    onDismissRequest()
+                }
+
+                return@ModalBottomSheet
+            }
+            
+            onDismissRequest()
+        }
     ) {
         Row(
             modifier = Modifier
@@ -285,7 +320,7 @@ fun CustomizeAppDialog(
                 ) {
                     context.startActivity(Intent(
                         Intent.ACTION_DELETE, 
-                        Uri.fromParts("package", app.intent.component!!.packageName, null)
+                        Uri.fromParts("package", app.packageName, null)
                     ))
                 },
 
@@ -298,8 +333,8 @@ fun CustomizeAppDialog(
                     coroutineScope.launch(Dispatchers.IO) {
                         catLauncher.database.appCustomization.insert(
                             DBAppCustomization(
-                                packageName = app.intent.component!!.packageName,
-                                activityName = app.intent.component!!.className,
+                                packageName = app.packageName,
+                                activityName = app.activityName,
                                 isHidden = true,
                                 customTitle = null
                             )

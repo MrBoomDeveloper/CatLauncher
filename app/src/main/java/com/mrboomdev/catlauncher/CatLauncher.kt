@@ -43,11 +43,22 @@ class CatLauncher(private val context: Context) {
         }
 
         installed.filter { app ->
+            if(app.packageName == context.packageName) {
+                // Hide own launcher shortcut
+                return@filter false
+            }
+            
             val custom = customMap[app.packageName to app.activityName]
             custom?.isHidden != true
         }.map { app ->
             val custom = customMap[app.packageName to app.activityName]
-            app.copy(title = custom?.customTitle ?: app.title)
+            
+            app.copy(
+                title = custom?.customTitle ?: app.title,
+                ogTitle = app.title
+            )
+        }.sortedBy { app ->
+            app.title
         }
     }.stateIn(
         scope = GlobalScope, 
@@ -136,8 +147,6 @@ class CatLauncher(private val context: Context) {
                 context = context,
                 cats = _cats.value.map { it.id }
             )
-        }.sortedBy { app ->
-            app.title
         })
         
         _isLoading.emit(false)

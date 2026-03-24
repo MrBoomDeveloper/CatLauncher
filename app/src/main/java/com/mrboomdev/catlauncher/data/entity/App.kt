@@ -12,6 +12,7 @@ data class App(
     val activityName: String,
     val version: String = "Unknown",
     val title: String,
+    val ogTitle: String = title,
     val icon: Painter,
     val cats: List<Int>
 )
